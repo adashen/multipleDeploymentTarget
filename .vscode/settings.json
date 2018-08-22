@@ -1,0 +1,3 @@
+{
+    "azure-iot-edge.TargetPlatforms": ["amd64", "arm32v7"]
+}
