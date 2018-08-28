@@ -1,24 +1,13 @@
-FROM microsoft/dotnet:2.0-runtime-stretch AS base
+FROM node:8-alpine
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends unzip procps && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app/
 
-RUN useradd -ms /bin/bash moduleuser
-USER moduleuser
-RUN curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg
+COPY package*.json ./
 
-FROM microsoft/dotnet:2.0-sdk AS build-env
-WORKDIR /app
+RUN npm install --production
 
-COPY *.csproj ./
-RUN dotnet restore
+COPY app.js ./
 
-COPY . ./
-RUN dotnet publish -c Debug -o out
+USER node
 
-FROM base
-WORKDIR /app
-COPY --from=build-env /app/out ./
-
-ENTRYPOINT ["dotnet", "pipemodule.dll"]
+CMD ["node", "--inspect=0.0.0.0:9229", "app.js"]
